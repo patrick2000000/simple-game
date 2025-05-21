@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Driving Game</title>
+  <style>
+    canvas {
+      background: #333;
+    }#score {
+
+      
+
+
+  top: 10px;
+  left: 10px;
+  font-size: 24px;
+  color: white;
+  background-color: black;
+  padding: 10px;
+  border-radius: 5px;
+}
+#startButton {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  padding: 15px 30px;
+  background-color: green;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  z-index: 1000;
+}
+  </style>
+</head>
+<body>
+  <button id="startButton">Start Game</button>
+  <div id="score">Score: 0</div>
+  <canvas id="gameCanvas" width="400" height="600"></canvas>
+  
+
+  <script>
+   
+    
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const car = {
+      x: 180,
+      y: 500,
+      width: 40,
+      height: 80,
+      color: 'red',
+      speed: 5
+    };
+
+    const keys = {
+      left: false,
+      right: false
+    };
+
+    const obstacles = [];
+    let gameOver = false;
+    let frame = 0;
+
+    function drawCar() {
+      ctx.fillStyle = car.color;
+      ctx.fillRect(car.x, car.y, car.width, car.height);
+    }
+
+    function drawObstacle(ob) {
+      ctx.fillStyle = 'yellow';
+      ctx.fillRect(ob.x, ob.y, ob.width, ob.height);
+    }
+
+    function updateObstacles() {
+      if (frame % 60 === 0) {
+        const x = Math.random() * (canvas.width - 50);
+        obstacles.push({ x, y: -100, width: 50, height: 100, speed: 3 });
+      }
+
+      for (let i = 0; i < obstacles.length; i++) {
+        obstacles[i].y += obstacles[i].speed;
+
+        // Collision detection
+        if (
+          car.x < obstacles[i].x + obstacles[i].width &&
+          car.x + car.width > obstacles[i].x &&
+          car.y < obstacles[i].y + obstacles[i].height &&
+          car.y + car.height > obstacles[i].y
+        ) {
+          gameOver = true;
+        }
+      }
+    }
+
+    function drawRoad() {
+      ctx.fillStyle = '#555';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function draw() {
+      if (gameOver) {
+        ctx.fillStyle = 'white';
+        ctx.font = '30px Arial';
+        ctx.fillText('Game Over!', 120, 300);
+        return;
+      }
+
+      drawRoad();
+      drawCar();
+      obstacles.forEach(drawObstacle);
+    }
+
+    function update() {
+      if (keys.left && car.x > 0) car.x -= car.speed;
+      if (keys.right && car.x + car.width < canvas.width) car.x += car.speed;
+
+      updateObstacles();
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      update();
+      draw();
+      frame++;
+      requestAnimationFrame(gameLoop);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowLeft') keys.left = true;
+      if (e.key === 'ArrowRight') keys.right = true;
+    });
+
+    document.addEventListener('keyup', e => {
+      if (e.key === 'ArrowLeft') keys.left = false;
+      if (e.key === 'ArrowRight') keys.right = false;
+    });
+
+    gameLoop();
+
+
+function updateScore() {
+  document.getElementById('score').innerText = `Score: ${score}`;
+}
+
+
+let score = 2;
+    let isGameRunning = false;
+    let isGameOver = false;
+    let scoreInterval;
+
+    function updateScore() {
+      document.getElementById('score').innerText = `Score: ${score}`;
+    }
+
+    function startGame() {
+      score = 0;
+      updateScore();
+      isGameRunning = true;
+      isGameOver = false;
+
+      // Tangira kubara score igihe umukino utangiye
+      scoreInterval = setInterval(() => {
+        if (isGameRunning && !isGameOver) {
+          score++;
+          updateScore();
+        }
+      }, 1000); // buri segonda
+
+      // Hano ushyiramo logic y'umukino yawe
+
+      // URUGERO: nyuma ya segonda 5, umukino urangira
+      setTimeout(() => {
+        endGame();
+      }, 5000);
+    }
+
+    function endGame() {
+      isGameOver = true;
+      isGameRunning = false;
+      clearInterval(scoreInterval); // Hagarika kubara score
+      document.getElementById('startButton').style.display = 'block';
+    }
+
+    document.getElementById('startButton').addEventListener('click', function () {
+      this.style.display = 'none';
+      startGame();
+    });
+    
+  </script>
+</body>
+</html>
